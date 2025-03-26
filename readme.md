@@ -1,4 +1,4 @@
-Creating and updating EOS dataset DOI citation library (Updated: 3-26-2025)
+Creating and updating collection of EOSDIS dataset citing publication citations (Updated: 3-26-2025)
 -------------
 
 JSON files are placed in data/ directory
@@ -17,7 +17,7 @@ Follow steps sequentially:
    Specify 'Publication Date' that covers the latest year or two.
    Inspect WoS/ directory -- move old .bib files out of the way.
    Export search results in BibTex format with 'Full Record and Cited References' into WoS/ directory (one .bib file contains <=500 citations).
-        * 1_1_eos_wos.py
+	* 1_1_eos_wos.py
 
 3) Run updates for Scopus, Crossref and Datacite for the full date range. Scopus has limits on API requests, may need to create a new key. 
 	* 1_2_eos_scopus.py				
@@ -25,10 +25,9 @@ Follow steps sequentially:
 	* 1_4_eos_datacite.py
 
 4) Run GS DOI searches by the specified earliest year (need SerpAPI key). It outputs GS URLs and linked dataset DOIs. The program needs serp_api_key.json which contains serp_api_key.
-
-        * 1_5_1_gs_serpapi.py
-        * 1_5_2_gs_get_increment.py
-        * 1_5_3_gs_process_urls.py
+	* 1_5_1_gs_serpapi.py
+	* 1_5_2_gs_get_increment.py
+	* 1_5_3_gs_process_urls.py
 	* 1_5_4_eos_google.py
 
 5) Combine all dois into one file
