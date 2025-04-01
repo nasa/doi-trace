@@ -25,4 +25,4 @@ dependencies = [
 Repository = "https://github.com/"
 
 [dependency-groups]
-dev = []
+dev = ["ruff"]
