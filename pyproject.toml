@@ -1,18 +1,25 @@
 [project]
 name = "DOITrace"
 version = "1.0.0"
+
 requires-python = ">= 3.11"
+
 description = "This project addresses the persistent challenges in tracking and analyzing dataset citations within scholarly literature, which are critical for evaluating dataset impact, ensuring proper attribution, and aligning with Findability, Accessibility, Interoperability, and Reusability (FAIR) data principles."
+
 readme = "README.md"
 license = { file = "LICENSE" }
+
 authors = [
   { name = "Irina Gerasimov" },
   { name = "Jon Carlson" },
   { name = "Ben Forshey" },
+
 ]
 dependencies = [
   "beautifulsoup4",
+  "click",
   "crossref",
+  "deepmerge",
   "elsapy",
   "habanero",
   "jellyfish",
