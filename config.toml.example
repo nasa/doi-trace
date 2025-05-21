@@ -1,0 +1,8 @@
+[directories]
+wos = "WoS"
+eosdis = "eosdis_csv_files"
+output = "data"
+
+[api]
+serp_key = ""  # SerpAPI key for Google Scholar
+scopus_key = ""  # Scopus API key 
