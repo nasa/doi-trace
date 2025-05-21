@@ -6,6 +6,8 @@ import json
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
 import eosutilities as eosutil
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
+import requests.exceptions
 
 
 class Scopus(ReferenceDataSource):
@@ -40,15 +42,16 @@ class Scopus(ReferenceDataSource):
         """Return the name of the source."""
         return "Scopus"
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(1),
+        retry=retry_if_exception_type((requests.exceptions.RequestException, requests.exceptions.HTTPError))
+    )
     def _get_scopus(self, term):
         """Fetch Scopus citations for a given term."""
         term = f'"{term}"'
         term = term.split('(', 1)[0]  # for ORNLS that have parenthesis in the doi name
         client = ElsClient(self.scopus_api_key)
-        
-        print('here with ' + self.scopus_api_key)
-        print(term)
-        
         doc_srch = ElsSearch(term, 'scopus')
         doc_srch.execute(client, get_all=True)
         return doc_srch.results
