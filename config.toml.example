@@ -4,5 +4,5 @@ eosdis = "eosdis_csv_files"
 output = "data"
 
 [api]
-serp_key = ""  # SerpAPI key for Google Scholar
-scopus_key = ""  # Scopus API key 
+serp_api_key = ""  # SerpAPI key for Google Scholar
+scopus_api_key = ""  # Scopus API key 

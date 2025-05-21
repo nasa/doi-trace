@@ -38,8 +38,8 @@ class Config(UserDict):
     
     # API settings
     [api]
-    serp_key = ""  # SerpAPI key for Google Scholar
-    scopus_key = ""  # Scopus API key
+    serp_api_key = ""  # SerpAPI key for Google Scholar
+    scopus_api_key = ""  # Scopus API key
     """
     
     user_config_path = "config.toml"
@@ -109,20 +109,25 @@ class Config(UserDict):
     def _load_env_vars(self) -> None:
         """Override configuration with environment variables."""
         # API keys
-        if serp_key := self._get_env("SERP_API_KEY"):
-            self.data["api"]["serp_key"] = serp_key
+        serp_api_key = self._get_env("SERP_API_KEY")
+        if serp_api_key is not None:
+            self.data["api"]["serp_api_key"] = serp_api_key
         
-        if scopus_key := self._get_env("SCOPUS_API_KEY"):
-            self.data["api"]["scopus_key"] = scopus_key
+        scopus_api_key = self._get_env("SCOPUS_API_KEY")
+        if scopus_api_key is not None:
+            self.data["api"]["scopus_api_key"] = scopus_api_key
         
         # Directories
-        if wos_dir := self._get_env("WOS_DIR"):
+        wos_dir = self._get_env("WOS_DIR")
+        if wos_dir is not None:
             self.data["directories"]["wos"] = wos_dir
         
-        if eosdis_dir := self._get_env("EOSDIS_DIR"):
+        eosdis_dir = self._get_env("EOSDIS_DIR")
+        if eosdis_dir is not None:
             self.data["directories"]["eosdis"] = eosdis_dir
         
-        if output_dir := self._get_env("OUTPUT_DIR"):
+        output_dir = self._get_env("OUTPUT_DIR")
+        if output_dir is not None:
             self.data["directories"]["output"] = output_dir
     
     def _get_env(self, key: str) -> Optional[str]:

@@ -2,6 +2,7 @@ import click
 from pathlib import Path
 from datetime import datetime
 from .reference_sources.web_of_science import WebOfScience
+from .reference_sources.scopus import Scopus
 from .config import config
 
 """
@@ -42,7 +43,7 @@ def wos(start_date, end_date):
 @click.option('--end-date', type=str, help='End date for citation search (format: YYYY-MM-DD)')
 def all(start_date, end_date):
     """Run all citation processors in sequence."""
-    processors = [WebOfScience]  # Add other processors here as they are implemented
+    processors = [WebOfScience, Scopus]  # Add other processors here as they are implemented
     for processor_class in processors:
         click.echo(f"Running {processor_class.__name__}...")
         processor = processor_class()
@@ -51,6 +52,19 @@ def all(start_date, end_date):
         output_path = Path(config.get_directory('output')) / f"{processor_class.__name__.lower()}_citations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         processor.save_results(processed_data, output_path)
         click.echo(f"Citations saved to {output_path}")
+
+
+@cli.command()
+@click.option('--start-date', type=str, help='Start date for citation search (format: YYYY-MM-DD)')
+@click.option('--end-date', type=str, help='End date for citation search (format: YYYY-MM-DD)')
+def scopus(start_date, end_date):
+    """Fetch citations from Scopus."""
+    scopus = Scopus()
+    raw_data = scopus.fetch_citations(dois=[], start_date=start_date, end_date=end_date)
+    processed_data = scopus.process_results(raw_data)
+    output_path = Path(config.get_directory('output')) / f"scopus_citations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    scopus.save_results(processed_data, output_path)
+    click.echo(f"Citations saved to {output_path}")
 
 
 if __name__ == '__main__':

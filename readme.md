@@ -44,6 +44,28 @@ Obtain latest dataset DOIs from EOSDIS DOI server https://doiserver.eosdis.nasa.
    - `--start-date`: Start date for citation search (YYYY-MM-DD)
    - `--end-date`: End date for citation search (YYYY-MM-DD)
 
+### Scopus Citations
+
+1. Create an account and an API key from https://dev.elsevier.com/
+2. Paste your API key into the "scopus_api_key" value in your config.toml 
+3. Run the Scopus citation processor:
+   ```bash
+   python -m doi_trace scopus --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+   ```
+
+   Options:
+   - `--start-date`: Start date for citation search (YYYY-MM-DD)
+   - `--end-date`: End date for citation search (YYYY-MM-DD)
+
+### Run ALL processors in order
+
+You can also run all the processors in order, rather than running each separately.
+
+To run all processors in sequence:
+   ```bash
+   python -m doi_trace all --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+   ```
+
 ### Output
 
 The tool generates JSON files in the output directory with the following information:
@@ -51,6 +73,8 @@ The tool generates JSON files in the output directory with the following informa
 - Cited dataset DOIs
 - Validation results
 - Processing metadata
+
+Output files are named according to the processor (e.g., `wos_citations_...json`, `scopus_citations_...json`).
 
 ## Configuration
 
