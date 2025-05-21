@@ -27,6 +27,7 @@ dependencies = [
   "requests",
   "serpapi",
   "tenacity",
+  "tqdm",
 ] # In zsh: `python -m pip install .`
 
 [project.urls]

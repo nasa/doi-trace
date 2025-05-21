@@ -8,6 +8,7 @@ from elsapy.elssearch import ElsSearch
 import eosutilities as eosutil
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 import requests.exceptions
+from tqdm import tqdm
 
 
 class Scopus(ReferenceDataSource):
@@ -24,9 +25,11 @@ class Scopus(ReferenceDataSource):
         eos_dois = eosutil.getAcronyms(eos_dois)  # Process DOIs
         citations = []
 
-        for doi in eos_dois:
-            results = self._get_scopus(doi['EOS DOI'])
-            citations.extend(results)
+        with tqdm(eos_dois, desc="Fetching Scopus citations") as pbar:
+            for doi in pbar:
+                pbar.set_postfix(doi=doi['EOS DOI'])
+                results = self._get_scopus(doi['EOS DOI'])
+                citations.extend(results)
         return citations
 
     def process_results(self, raw_data):
