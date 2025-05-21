@@ -37,5 +37,21 @@ def wos(start_date, end_date):
     click.echo(f"Citations saved to {output_path}")
 
 
+@cli.command()
+@click.option('--start-date', type=str, help='Start date for citation search (format: YYYY-MM-DD)')
+@click.option('--end-date', type=str, help='End date for citation search (format: YYYY-MM-DD)')
+def all(start_date, end_date):
+    """Run all citation processors in sequence."""
+    processors = [WebOfScience]  # Add other processors here as they are implemented
+    for processor_class in processors:
+        click.echo(f"Running {processor_class.__name__}...")
+        processor = processor_class()
+        raw_data = processor.fetch_citations(dois=[], start_date=start_date, end_date=end_date)
+        processed_data = processor.process_results(raw_data)
+        output_path = Path(config.get_directory('output')) / f"{processor_class.__name__.lower()}_citations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        processor.save_results(processed_data, output_path)
+        click.echo(f"Citations saved to {output_path}")
+
+
 if __name__ == '__main__':
     cli()
