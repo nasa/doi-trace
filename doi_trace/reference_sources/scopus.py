@@ -5,6 +5,8 @@ from ..config import config
 import json
 from elsapy.elsclient import ElsClient
 from elsapy.elssearch import ElsSearch
+import eosutilities as eosutil
+
 
 class Scopus(ReferenceDataSource):
     def __init__(self):
@@ -15,12 +17,13 @@ class Scopus(ReferenceDataSource):
         """Fetch citations from Scopus."""
         if not self.scopus_api_key:
             raise ValueError("Scopus API key is not set. Please check your configuration.")
+        
+        eos_dois = eosutil.getEOSCSV()  # Load EOS DOIs from CSV
+        eos_dois = eosutil.getAcronyms(eos_dois)  # Process DOIs
         citations = []
 
-        print(dois)
-
-        for doi in dois:
-            results = self._get_scopus(doi)
+        for doi in eos_dois:
+            results = self._get_scopus(doi['EOS DOI'])
             citations.extend(results)
         return citations
 
