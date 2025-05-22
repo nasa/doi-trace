@@ -20,6 +20,12 @@ class Config(UserDict):
     """
     
     default_config = """
+    # Application Settings
+    project_name = "DOI Trace"
+    version = "May 2025"
+    organization = "NASA"
+    email = "info@disc.gsfc.nasa.gov"
+
     # General settings
     max_threads = 1           # limit the number of threads that we will use when multithreading tasks
     pretty_print_indent = 4   # set the level of indentation for pretty printing
@@ -58,7 +64,7 @@ class Config(UserDict):
             base=loads(self.default_config),
             next=self.get_user_config()
         )
-        
+
         # Override with environment variables
         self._load_env_vars()
     

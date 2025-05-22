@@ -1,3 +1,6 @@
+organization = "NASA"
+email = "youremail@nasa.gov"
+
 [directories]
 wos = "WoS"
 eosdis = "eosdis_csv_files"
