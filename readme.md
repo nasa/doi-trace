@@ -57,6 +57,41 @@ Obtain latest dataset DOIs from EOSDIS DOI server https://doiserver.eosdis.nasa.
    - `--start-date`: Start date for citation search (YYYY-MM-DD)
    - `--end-date`: End date for citation search (YYYY-MM-DD)
 
+### Crossref Citations
+
+Run the Crossref citation processor:
+   ```bash
+   python -m doi_trace crossref --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+   ```
+
+   Options:
+   - `--start-date`: Start date for citation search (YYYY-MM-DD)
+   - `--end-date`: End date for citation search (YYYY-MM-DD)
+
+### DataCite Citations
+
+Run the DataCite citation processor:
+   ```bash
+   python -m doi_trace datacite --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+   ```
+
+   Options:
+   - `--start-date`: Start date for citation search (YYYY-MM-DD)
+   - `--end-date`: End date for citation search (YYYY-MM-DD)
+
+### Google Scholar Citations
+
+1. Create an account and an API key from https://serpapi.com/
+2. Paste your API key into the "serp_api_key" value in your config.toml 
+3. Run the Google Scholar citation processor:
+   ```bash
+   python -m doi_trace google-scholar --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+   ```
+
+   Options:
+   - `--start-date`: Start date for citation search (YYYY-MM-DD)
+   - `--end-date`: End date for citation search (YYYY-MM-DD)
+
 ### Run ALL processors in order
 
 You can also run all the processors in order, rather than running each separately.
@@ -110,24 +145,7 @@ doi_trace/
    - `get_source_name()`
 3. Add a new command to `cli.py`
 
-Creating and updating collection of EOSDIS dataset citing publication citations (Updated: 3-26-2025)
--------------
 
-JSON files are placed in data/ directory
-EOSDIS CSV files are in eosdis_csv_files/ directory
-WoS .bib files are in WoS/ directory
-eosutilities.py - our own library with the most common functions 
-
-Follow steps sequentially:
-
-1) 
-
-2) 
-
-3) Run updates for Scopus, Crossref and Datacite for the full date range. Scopus has limits on API requests, may need to create a new key. 
-	* 1_2_eos_scopus.py				
-	* 1_3_eos_crossref.py
-	* 1_4_eos_datacite.py
 
 4) Run GS DOI searches by the specified earliest year (need SerpAPI key). It outputs GS URLs and linked dataset DOIs. The program needs serp_api_key.json which contains serp_api_key.
 	* 1_5_1_gs_serpapi.py

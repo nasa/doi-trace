@@ -21,12 +21,12 @@ dependencies = [
   "crossrefapi",
   "deepmerge",
   "elsapy",
+  "google-search-results",
   "habanero",
   "jellyfish",
   "pandas",
   "requests",
   "sentencepiece",
-  "serpapi",
   "tenacity",
   "tqdm",
 ] # In zsh: `python -m pip install .`
