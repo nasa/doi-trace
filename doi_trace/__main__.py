@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 from .reference_sources.web_of_science import WebOfScience
 from .reference_sources.scopus import Scopus
+from .reference_sources.crossref import Crossref
 from .config import config
 
 """
@@ -41,9 +42,22 @@ def wos(start_date, end_date):
 @cli.command()
 @click.option('--start-date', type=str, help='Start date for citation search (format: YYYY-MM-DD)')
 @click.option('--end-date', type=str, help='End date for citation search (format: YYYY-MM-DD)')
+def crossref(start_date, end_date):
+    """Fetch citations from Crossref."""
+    crossref = Crossref()
+    raw_data = crossref.fetch_citations(dois=[], start_date=start_date, end_date=end_date)
+    processed_data = crossref.process_results(raw_data)
+    output_path = Path(config.get_directory('output')) / f"crossref_citations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    crossref.save_results(processed_data, output_path)
+    click.echo(f"Citations saved to {output_path}")
+
+
+@cli.command()
+@click.option('--start-date', type=str, help='Start date for citation search (format: YYYY-MM-DD)')
+@click.option('--end-date', type=str, help='End date for citation search (format: YYYY-MM-DD)')
 def all(start_date, end_date):
     """Run all citation processors in sequence."""
-    processors = [WebOfScience, Scopus]  # Add other processors here as they are implemented
+    processors = [WebOfScience, Scopus, Crossref]  # Add other processors here as they are implemented
     for processor_class in processors:
         click.echo(f"Running {processor_class.__name__}...")
         processor = processor_class()
