@@ -1,0 +1,11 @@
+organization = "NASA"
+email = "youremail@nasa.gov"
+
+[directories]
+wos = "WoS"
+eosdis = "eosdis_csv_files"
+output = "data"
+
+[api]
+serp_api_key = ""  # SerpAPI key for Google Scholar (https://serpapi.com/)
+scopus_api_key = ""  # Scopus API key (https://dev.elsevier.com/)
