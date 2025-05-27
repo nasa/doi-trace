@@ -13,6 +13,8 @@ import unicodedata
 from bs4 import BeautifulSoup
 from html import unescape
 import pandas as pd
+import concurrent.futures
+import os
 
 
 class Crossref(ReferenceDataSource):
@@ -41,6 +43,8 @@ class Crossref(ReferenceDataSource):
             'wikipedia',
             'wordpressdotcom'
         ]
+        # Set number of workers based on CPU count, but limit to avoid overwhelming the API
+        self.max_workers = min(os.cpu_count() or 4, 8)
     
     def get_source_name(self) -> str:
         """Get the name of the data source."""
@@ -79,6 +83,8 @@ class Crossref(ReferenceDataSource):
                                 'EOS DOI': eos_doi
                             })
 
+        print(f"\nFound {len(citations)} citations. Processing...")
+        
         # Combine duplicates and add metadata
         citations = self._combine_duplicates(citations)
         citations = self._extract_metadata(citations)
@@ -122,51 +128,63 @@ class Crossref(ReferenceDataSource):
             unique_dois.add(citation['DOI'])
             
         combined = []
-        for doi in unique_dois:
-            eos_dois = set()
-            for citation in citations:
-                if citation['DOI'] == doi:
-                    eos_dois.add(citation['EOS DOI'])
-                    
-            combined.append({
-                'DOI': doi,
-                'Cited-References': [{
-                    'EOS DOI': eos_doi,
-                    'LP Agency': df.loc[df['EOS DOI'] == eos_doi]['LP Agency'].values[0],
-                    'Shortname': df.loc[df['EOS DOI'] == eos_doi]['Shortname'].values[0]
-                } for eos_doi in eos_dois]
-            })
+        with tqdm(total=len(unique_dois), desc="Combining duplicates") as pbar:
+            for doi in unique_dois:
+                eos_dois = set()
+                for citation in citations:
+                    if citation['DOI'] == doi:
+                        eos_dois.add(citation['EOS DOI'])
+                        
+                combined.append({
+                    'DOI': doi,
+                    'Cited-References': [{
+                        'EOS DOI': eos_doi,
+                        'LP Agency': df.loc[df['EOS DOI'] == eos_doi]['LP Agency'].values[0],
+                        'Shortname': df.loc[df['EOS DOI'] == eos_doi]['Shortname'].values[0]
+                    } for eos_doi in eos_dois]
+                })
+                pbar.update(1)
         return combined
     
-    def _extract_metadata(self, citations):
-        """Extract metadata from Crossref for each citation."""
-        for citation in citations:
-            print('on citation ', citation['DOI'])
-
-            try:
-                record = self.works.doi(citation['DOI'])
-                if record and record.get('subtype') != 'preprint':
-                    # Extract and sanitize title
-                    title = record.get('title', [''])[0]
-                    title = BeautifulSoup(unescape(title), 'lxml').text
-                    title = unicodedata.normalize('NFKD', title).encode('ascii', 'ignore').decode('ascii')
-                    citation['Title'] = title
-                    
-                    # Extract year
+    def _extract_metadata_for_doi(self, citation):
+        """Extract metadata for a single DOI."""
+        try:
+            record = self.works.doi(citation['DOI'])
+            if record and record.get('subtype') != 'preprint':
+                title = record.get('title', [''])[0]
+                title = BeautifulSoup(unescape(title), 'lxml').text
+                title = unicodedata.normalize('NFKD', title).encode('ascii', 'ignore').decode('ascii')
+                citation['Title'] = title
+                
+                try:
+                    year = record['created'].get('date-parts')[0][0]
+                except:
                     try:
-                        year = record['created'].get('date-parts')[0][0]
+                        year = record['published-print'].get('date-parts')[0][0]
                     except:
-                        try:
-                            year = record['published-print'].get('date-parts')[0][0]
-                        except:
-                            year = ''
-                    citation['Year'] = str(year)
-                    
-                    # Extract type
-                    citation['Type'] = record.get('type', '')
-            except Exception as e:
-                print(f"Error extracting metadata for {citation['DOI']}: {e}")
-                continue
+                        year = ''
+                citation['Year'] = str(year)
+                
+                # Extract type
+                citation['Type'] = record.get('type', '')
+        except Exception as e:
+            print(f"Error extracting metadata for {citation['DOI']}: {e}")
+        return citation
+    
+    def _extract_metadata(self, citations):
+        """Extract metadata from Crossref for each citation using parallel processing."""
+        with tqdm(total=len(citations), desc="Extracting metadata") as pbar:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                # Submit all tasks
+                future_to_citation = {
+                    executor.submit(self._extract_metadata_for_doi, citation): citation 
+                    for citation in citations
+                }
+                
+                # Process results as they complete
+                for future in concurrent.futures.as_completed(future_to_citation):
+                    pbar.update(1)
+        
         return citations
     
     def process_results(self, raw_data):
