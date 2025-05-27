@@ -7,6 +7,7 @@ from .reference_sources.crossref import Crossref
 from .reference_sources.datacite import DataCite
 from .reference_sources.google_scholar import GoogleScholar
 from .config import config
+from .combine import CitationCombiner
 
 """
 This module handles ensuring that 
@@ -104,27 +105,19 @@ def google_scholar(start_date, end_date):
 
 
 @cli.command()
-@click.option('--start-date', type=click.DateTime(formats=["%Y-%m-%d"]), help="Start date for citation search (YYYY-MM-DD)", required=True)
-@click.option('--end-date', type=click.DateTime(formats=["%Y-%m-%d"]), help="End date for citation search (YYYY-MM-DD)", required=True)
-def all(start_date, end_date):
-    """Run all citation processors."""
-    processors = [
-        WebOfScience(),
-        Scopus(),
-        Crossref(),
-        DataCite(),
-        GoogleScholar()
-    ]
+@click.option('--sources', '-s', multiple=True,
+              type=click.Choice(['wos', 'scopus', 'crossref', 'datacite', 'google-scholar']),
+              help="Sources to combine (can specify multiple, defaults to all if none specified)")
+@click.option('--date', help="Date string to use in output filename (defaults to current date)")
+def combine(sources, date):
+    """Combine citation data from multiple sources."""
+    # If no sources specified, use all available sources
+    if not sources:
+        sources = ['wos', 'scopus', 'crossref', 'datacite', 'google-scholar']
+        print("No sources specified, using all available sources")
     
-    for processor in processors:
-        click.echo(f"\nProcessing {processor.get_source_name()} citations...")
-        citations = processor.fetch_citations(None, start_date, end_date)
-        processed = processor.process_results(citations)
-        
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_path = f"{processor.get_source_name().lower().replace(' ', '_')}_citations_{timestamp}.json"
-        processor.save_results(processed, output_path)
-        click.echo(f"Results saved to {output_path}")
+    combiner = CitationCombiner()
+    combiner.combine_sources(sources, date)
 
 
 if __name__ == '__main__':

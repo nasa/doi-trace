@@ -92,6 +92,22 @@ Run the DataCite citation processor:
    - `--start-date`: Start date for citation search (YYYY-MM-DD)
    - `--end-date`: End date for citation search (YYYY-MM-DD)
 
+### Combine Citations
+
+Run the citation combiner to merge results from multiple sources:
+   ```bash
+   # Combine all sources
+   python -m doi_trace combine
+
+   # Combine specific sources
+   python -m doi_trace combine -s wos -s google-scholar -s scopus
+   ```
+
+   The combiner will:
+   - Find the most recent citation files for each source
+   - Create a unique set of DOIs across all sources
+   - Save the combined results to `data/combined_citations_YYYYMMDD.json`
+
 ### Run ALL processors in order
 
 You can also run all the processors in order, rather than running each separately.
@@ -110,49 +126,3 @@ The tool generates JSON files in the output directory with the following informa
 - Processing metadata
 
 Output files are named according to the processor (e.g., `wos_citations_...json`, `scopus_citations_...json`).
-
-## Configuration
-
-The tool can be configured using:
-1. Environment variables
-2. `config.toml` file
-3. Command-line arguments
-
-See `config.toml` for available settings.
-
-## Development
-
-### Project Structure
-
-```
-doi_trace/
-├── __init__.py
-├── cli.py
-├── config.py
-└── reference_sources/
-    ├── __init__.py
-    ├── base.py
-    └── web_of_science.py
-```
-
-### Adding New Data Sources
-
-1. Create a new class in `reference_sources/` that inherits from `ReferenceDataSource`
-2. Implement the required methods:
-   - `fetch_citations()`
-   - `process_results()`
-   - `save_results()`
-   - `get_source_name()`
-3. Add a new command to `cli.py`
-
-
-
-4) Run GS DOI searches by the specified earliest year (need SerpAPI key). It outputs GS URLs and linked dataset DOIs. The program needs serp_api_key.json which contains serp_api_key.
-	* 1_5_1_gs_serpapi.py
-	* 1_5_2_gs_get_increment.py
-	* 1_5_3_gs_process_urls.py
-	* 1_5_4_eos_google.py
-
-5) Combine all dois into one file
-	* 2_combine_doi_sources.py
-
