@@ -364,5 +364,8 @@ class GoogleScholar(ReferenceDataSource):
     
     def save_results(self, processed_data, output_path):
         """Save the processed data to a JSON file."""
+        os.makedirs('data', exist_ok=True)
+        
+        output_path = os.path.join('data', os.path.basename(output_path))
         with open(output_path, 'w') as f:
             json.dump(processed_data, f, indent=4) 
