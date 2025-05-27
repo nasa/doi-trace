@@ -4,6 +4,7 @@ from datetime import datetime
 from .reference_sources.web_of_science import WebOfScience
 from .reference_sources.scopus import Scopus
 from .reference_sources.crossref import Crossref
+from .reference_sources.datacite import DataCite
 from .config import config
 
 """
@@ -31,11 +32,13 @@ def cli():
 @click.option('--end-date', type=str, help='End date for citation search (format: YYYY-MM-DD)')
 def wos(start_date, end_date):
     """Fetch citations from Web of Science."""
-    wos = WebOfScience()
-    raw_data = wos.fetch_citations(dois=[], start_date=start_date, end_date=end_date)
-    processed_data = wos.process_results(raw_data)
-    output_path = Path(config.get_directory('output')) / f"wos_citations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    wos.save_results(processed_data, output_path)
+    processor = WebOfScience()
+    citations = processor.fetch_citations(None, start_date, end_date)
+    processed = processor.process_results(citations)
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_path = Path(config.get_directory('output')) / f"wos_citations_{timestamp}.json"
+    processor.save_results(processed, output_path)
     click.echo(f"Citations saved to {output_path}")
 
 
@@ -44,11 +47,28 @@ def wos(start_date, end_date):
 @click.option('--end-date', type=str, help='End date for citation search (format: YYYY-MM-DD)')
 def crossref(start_date, end_date):
     """Fetch citations from Crossref."""
-    crossref = Crossref()
-    raw_data = crossref.fetch_citations(dois=[], start_date=start_date, end_date=end_date)
-    processed_data = crossref.process_results(raw_data)
-    output_path = Path(config.get_directory('output')) / f"crossref_citations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    crossref.save_results(processed_data, output_path)
+    processor = Crossref()
+    citations = processor.fetch_citations(None, start_date, end_date)
+    processed = processor.process_results(citations)
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_path = Path(config.get_directory('output')) / f"crossref_citations_{timestamp}.json"
+    processor.save_results(processed, output_path)
+    click.echo(f"Citations saved to {output_path}")
+
+
+@cli.command()
+@click.option('--start-date', type=str, help='Start date for citation search (format: YYYY-MM-DD)')
+@click.option('--end-date', type=str, help='End date for citation search (format: YYYY-MM-DD)')
+def datacite(start_date, end_date):
+    """Fetch citations from DataCite."""
+    processor = DataCite()
+    citations = processor.fetch_citations(None, start_date, end_date)
+    processed = processor.process_results(citations)
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_path = Path(config.get_directory('output')) / f"datacite_citations_{timestamp}.json"
+    processor.save_results(processed, output_path)
     click.echo(f"Citations saved to {output_path}")
 
 
@@ -57,28 +77,20 @@ def crossref(start_date, end_date):
 @click.option('--end-date', type=str, help='End date for citation search (format: YYYY-MM-DD)')
 def all(start_date, end_date):
     """Run all citation processors in sequence."""
-    processors = [WebOfScience, Scopus, Crossref]  # Add other processors here as they are implemented
-    for processor_class in processors:
-        click.echo(f"Running {processor_class.__name__}...")
-        processor = processor_class()
-        raw_data = processor.fetch_citations(dois=[], start_date=start_date, end_date=end_date)
-        processed_data = processor.process_results(raw_data)
-        output_path = Path(config.get_directory('output')) / f"{processor_class.__name__.lower()}_citations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        processor.save_results(processed_data, output_path)
+    processors = [
+        WebOfScience(),
+        Scopus(),
+        Crossref(),
+        DataCite()
+    ]
+    
+    for processor in processors:
+        click.echo(f"Running {processor.get_source_name()}...")
+        citations = processor.fetch_citations(None, start_date, end_date)
+        processed = processor.process_results(citations)
+        output_path = Path(config.get_directory('output')) / f"{processor.get_source_name().lower()}_citations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        processor.save_results(processed, output_path)
         click.echo(f"Citations saved to {output_path}")
-
-
-@cli.command()
-@click.option('--start-date', type=str, help='Start date for citation search (format: YYYY-MM-DD)')
-@click.option('--end-date', type=str, help='End date for citation search (format: YYYY-MM-DD)')
-def scopus(start_date, end_date):
-    """Fetch citations from Scopus."""
-    scopus = Scopus()
-    raw_data = scopus.fetch_citations(dois=[], start_date=start_date, end_date=end_date)
-    processed_data = scopus.process_results(raw_data)
-    output_path = Path(config.get_directory('output')) / f"scopus_citations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    scopus.save_results(processed_data, output_path)
-    click.echo(f"Citations saved to {output_path}")
 
 
 if __name__ == '__main__':
